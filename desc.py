@@ -1,5 +1,9 @@
 #!/bin/env python3.9
 
+###################################
+###     Albert Masip-Sánchez    ###
+###################################
+
 import os
 import re
 import sys
