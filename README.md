@@ -1,12 +1,13 @@
 <div style="text-align: center;">
-  <img src="images/desc-logo.png" width="350"/>
+  <img src="images/desc-logo.png" width="450"/>
 </div>
 
 # DESC: Dynamic Environment in Solution by Clustering
 
 - [Introduction](#Introduction)
-- [Installation](#Installation)
+- [Requirements](#Requirements)
 - [Quickstart](#Quickstart)
+- [Usage](#Usage)
 - [How to Cite](#Howtocite)
 - [License and Copyright Information](#licenseandcopyrightinformation) 
 - [Support and Contact](#supportandcontact)
@@ -16,18 +17,46 @@ The properties and dynamic behavior of molecules in solution are influenced by t
 
 We propose DESC, an automated strategy that incorporates detailed counterion effects from classical Molecular Dynamics (MD) data into QM calculations. DESC enhances ISMs by accurately accounting for environmental variability and is especially useful for systems with significant aggregation and physicochemical changes due to counterions. DESC yields chemically representative QM results at a fraction of the computational cost compared to explicit counterions.
 
-**Authors**: <u>Albert Masip-Sánchez</u><sup>a</sup>, Xavier López<sup>a</sup>, Josep M. Poblet<sup>a</sup>
+**Authors**: Albert Masip-Sánchez<sup>a</sup>, Xavier López<sup>a</sup>, Josep M. Poblet<sup>a</sup>
 
 <small><sup>a</sup> Quantum Chemistry Group, Physical and Inorganic Chemistry Department, Universitat Rovira i Virgili - Tarragona - Spain</small>
 
-## Installation
+**Developer(s)**: Albert Masip-Sánchez
+
+## Requirements
+The utilization of DESC necessitates the installation of the following Python libraries:
+```
+os
+re
+sys
+numpy
+pandas
+sklearn (extra.cluster)
+scipy
+```
 
 ## Quickstart
+The computational strategy employed by DESC has been implemented in a [Python code]() that, given a trajectory in PDB format and a very simple [input file](job-DESC) with information about the system, can analyze the molecular dynamics simulation and generate an ADF input file ready to be submitted, thereby incorporating the effects of the aggregated ions on the solute. It is a model of general application, with no restrictions in terms of molecular charge, nature or number of the constituent molecules, or solvent nature. The use of ADF software is not restrictive; the concepts behind DESC are broadly applicable to any other computational software. However, the integration with other programs remains to be addressed in subsequent versions of DESC.
 
- 
+The most novel aspect of DESC is that, in order to account counterion effects, it introduces them through:
+1. a cloud of point charges positioned at the locations of the counterions aggregated during the MD simulation, and
+2. a set of ghost atoms with explicit spherical volume that simulate the presence of cations around a solute, placed at the most representative positions of the counterions.
+
+With the correct selection of radius and charge, the model can capture the effects present in a calculation with explicit counterions without double counting their effect on the ISM. While COSMO already introduces the average effect of counterions in an implicit bulk, the introduction of ghost atoms with volume, which prevent the ISM from reaching the solute in certain regions, and surrounding it with an adjusted charge distribution, reproduces the local effects of explicit counterions.
+
+Before DESC is used, it is crucial that the solute of interest maintains the same orientation (both rotationally and translationally) throughout the entire trajectory. This ensures that all frames processed by DESC are equivalent and comparable, as well as confirming that the ionic atmosphere around the solute is accurately reproduced. Trajectories can be easily converted using specific software such as [GROMACS](https://manual.gromacs.org/current/onlinehelp/gmx-trjconv.html), Python libraries like [MDAnalysis](https://docs.mdanalysis.org/1.0.1/documentation_pages/transformations/fit.html), or scripts for [VMD](trjfitting.tcl). What these algorithms do is use a frame from the molecular dynamics simulation as a reference and reduce the root-mean-square deviation (RMSD) between the frames, keeping one residue fixed (in this case).
+
+![](images/desc-proc.png)
+
+More information about DESC can be found in the [PhD thesis](link) of the author.
+
+## Usage
+
 
 ## How to cite
+If you employ DESC and publish findings derived from this method, we kindly request that you cite the original publication:
 
-## License and Copyright Information
+> Masip-Sánchez, A., López, X., Poblet, J.M., *Manuscript in preparation*, **2024**.
 
 ## Support and Contact
+In case you should encounter problems or bugs, please write a short message to albert.masip@urv.cat.
