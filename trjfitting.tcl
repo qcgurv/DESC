@@ -1,9 +1,9 @@
 # Ask the user for the residue name of the reference structure
 puts "Please enter the residue name of the reference structure:"
-gets stdin resname
+gets stdin resid
 
 # Atom selection for the group to align
-set selection_string "resname $resname"
+set selection_string "resid $resid"
 
 # Create atom selections
 set sel_reference [atomselect top "$selection_string" frame 0]
