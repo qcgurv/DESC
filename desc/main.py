@@ -63,7 +63,7 @@ if __name__ == "__main__":
         'pandas': 'pandas',
         'numpy': 'numpy',
         'scipy': 'scipy',
-        'sklearn_extra': 'sklearn_extra',
+        'scikit-learn-extra': 'sklearn_extra',
         'openbabel': 'openbabel',
         'rdkit': 'rdkit'
     }
