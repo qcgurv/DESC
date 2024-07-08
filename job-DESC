@@ -8,9 +8,6 @@ frames      =
 # Reference residue name (solute)
 ref         = 
 
-# Dielectric constant of bulk solvent
-eps         = 
-
 #### RESIDUES
 # Atom name, residue name and charge of each residue
 # in case of multiple residues, introduce them separated by a blank space
