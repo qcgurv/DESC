@@ -6,10 +6,10 @@ setup(
     packages=find_packages(),
     install_requires=[
         'pandas>=1.3.0',
-        'numpy>=1.21.0',
-        'scipy>=1.7.0',
+        'numpy>=1.26.2',
+        'scipy>=1.11.4',
         'sklearn-extra>=0.2.0',
-        'openbabel>=3.1.1',
+        'openbabel>=3.1.0',
         'rdkit>=2021.03.1'
     ],
     entry_points={
