@@ -1,0 +1,16 @@
+#### TRAJECTORY
+# Trajectory filename
+traj        = traj.pdb
+
+# Number of frames to save
+frames      = 400
+
+# Reference residue name (solute)
+ref         = LNW
+
+#### RESIDUES
+# Atom name, residue name and charge of each residue
+# in case of multiple residues, introduce them separated by a blank space
+atname       = N1
+resname      = TMA
+qform        = 1
