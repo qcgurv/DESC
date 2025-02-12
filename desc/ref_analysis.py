@@ -3,6 +3,7 @@ import pandas as pd
 from .geometry import com_calc, ref_radius
 from .utils import getelement
 
+
 def analyze_reference(maindf, ref, atomic_weights):
     print(f"  Looking for {ref}")
     ref_data = maindf[maindf['residue'] == ref]
