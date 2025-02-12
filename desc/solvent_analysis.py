@@ -81,24 +81,33 @@ def analyze_solvent(maindf, adf_solvent):
             break
     else:
         print("Solvent formula not found in the ADF solvent database.")
+        print("Solvents:")
+
+        solvent_names = list(adf_solvent.keys())
+        for i in range(0, len(solvent_names), 4):
+            print('{:<25} {:<25} {:<25} {:<25}'.format(
+                solvent_names[i],
+                solvent_names[i+1] if i+1 < len(solvent_names) else '',
+                solvent_names[i+2] if i+2 < len(solvent_names) else '',
+                solvent_names[i+3] if i+3 < len(solvent_names) else '',
+            ))
+
         while True:
-            solv_name = input("Please specify the solvent name (must be in the ADF solvent database): ")
-            if solv_name in adf_solvent:
+            solv_name_input = input("Please specify the solvent name (must be in the ADF solvent database): ")
+            solv_name = next((name for name in adf_solvent if name.lower() == solv_name_input.lower()), None)
+            if solv_name:
                 eps = adf_solvent[solv_name]['eps']
                 break
             else:
                 print(f"WARNING: '{solv_name}' is not in the ADF solvent database. Please enter a valid solvent name.")
-
-        if solv_name not in adf_solvent:
-            while True:
-                try:
-                    eps = float(input(f"Please specify the dielectric constant (eps) for the solvent '{solv_name}': "))
-                    break
-                except ValueError:
-                    print("Invalid input. Please enter a numerical value for the dielectric constant.")
-
-            print(f"WARNING: '{solv_name}' is not in the ADF solvent database. Continuing with specified values.")
-        else:
-            eps = adf_solvent[solv_name]['eps']
-    
+                while True:
+                    try:
+                        eps = float(input(f"Please specify the dielectric constant (eps) for the solvent '{solv_name}': "))
+                        solv_name = solv_name_input
+                        break
+                    except ValueError:
+                        print("Invalid input. Please enter a numerical value for the dielectric constant.")
+                print(f"Continuing with specified values for solvent '{solv_name}'.")
+                break             
+                
     return solv_name, eps
