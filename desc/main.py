@@ -22,10 +22,11 @@ def main():
         sys.exit(1)
 
     job_file = sys.argv[1]
-    maindf, maindir, natoms_ss, filt_ss, box_length, ref, atname, resname, qform = data_processing(job_file)
-  
+    maindf, maindir, box_length, ref, atname, resname, qform = data_processing(job_file)
+
     ## Solvent
     solv_name, eps = analyze_solvent(maindf, adf_solvent)
+    print(f"  Solvent found: {solv_name}, Rel. permittivity: {eps}")
 
     ## Reference
     ref_com, r_ref, adf_atomlist = analyze_reference(maindf, ref, atomic_weights)
@@ -35,7 +36,7 @@ def main():
 
     end_time = time.time()
     elapsed_time = end_time - start_time
-    print(f"  Execution time: {int(elapsed_time)} seconds")
+    print(f"  Execution time: {elapsed_time:.1f} seconds")
 
     # Add execution time to log files
     add_execution_time_to_logs(atname, resname, int(elapsed_time))
@@ -56,7 +57,7 @@ def add_execution_time_to_logs(atname, resname, execution_time):
         log_filename = os.path.join(directory, f"logfile_{ATNAME}_{RESNAME}")
         if os.path.exists(log_filename):
             with open(log_filename, 'a') as f:
-                f.write(f"Execution time: {execution_time} seconds\n")
+                f.write(f"Execution time: {execution_time:.1f} seconds\n")
                 
 if __name__ == "__main__":
     dependencies = {
