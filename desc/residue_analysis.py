@@ -181,6 +181,9 @@ def process_residues(maindf, ref_com, box_length, vol_dict, atomic_weights, eps,
         mean_vRg, std_vRg = compute_vRg(resid_data, vol_dict)
         print(f"  v-Rg of {RESNAME}: {mean_vRg:.3f} ± {std_vRg:.3f}")
 
+        #Cutoff for maximum integration distance
+        cutoff = (r_ref + 1.5) + (mean_vRg * 1.5)
+
         # Radial Distribution Function between COM(REF) and ATNAME
         bin_r, g_r, bin_width, distances, number_density, bin_edges = compute_rdf(res_data, ref_com, box_length)
         rdfdf = pd.DataFrame({"Distance": bin_r, "g(r)": g_r})
@@ -193,11 +196,18 @@ def process_residues(maindf, ref_com, box_length, vol_dict, atomic_weights, eps,
         # Find peaks
         peaks = find_rdf_peaks(g_r_smoothed, bin_width)
         res_peak_max_r, res_integration_distances = integrate_rdf(bin_r, g_r_fd, peaks)
-
-        DIST = np.max(res_integration_distances)
         HPD = np.max(res_peak_max_r)
-        print(f"  Highest Peak Distance: {HPD:.2f} angstrom")
-        print(f"  Total Integration Distance: {DIST:.2f} angstrom")
+
+        maxdist = np.max(res_integration_distances)
+        
+        DIST = 0.0
+        if cutoff  > maxdist:
+            DIST = maxdist
+            print(f"  Highest Peak Distance: {HPD:.2f} angstrom")
+            print(f"  Total Integration Distance: {DIST:.2f} angstrom")
+        else:
+            DIST = cutoff
+            print(f"   No Integration Distance found, presumably there is no {RESNAME} nearby. Using cutoff distance instead: {DIST:.2f} angstrom")
 
         intres_data = filter_residue_data(res_data, distances, DIST)
         filt_at = len(intres_data)
@@ -205,28 +215,24 @@ def process_residues(maindf, ref_com, box_length, vol_dict, atomic_weights, eps,
         aps = filt_at / int_ss
         print(f"  Clustering...")
 
-        print_once = False # Print average coordination only once
         (near_aps, far_aps), chkaps = isbtw(aps)
         if chkaps:
             for val in [near_aps, far_aps]:
-                if not print_once:
-                    if val == 0:
-                        continue
+                if val == 0:
+                    continue
+                intres_data, pqdf_sel, pqres_data, clusterdf, ghostdf, adf_ghost = clustering(intres_data, CHARGE, eps, val, mean_vRg)
+                adf_pointcharges = save_pointcharges(pqres_data, pqdf_sel, val)
+                ADF_input(ref, adf_atomlist, solv_name, adf_ghost, adf_pointcharges, val)
+                os.rename(f"./{ref}_DESC_{val}.in", f"../{ref}_DESC_{val}.in")
 
-                    intres_data, pqdf_sel, pqres_data, clusterdf, ghostdf, adf_ghost = clustering(intres_data, CHARGE, eps, val, mean_vRg)
-                    adf_pointcharges = save_pointcharges(pqres_data, pqdf_sel, val)
-                    ADF_input(ref, adf_atomlist, solv_name, ghostdf, adf_pointcharges, val)
-                    os.rename(f"./{ref}_DESC_{val}.in", f"../{ref}_DESC_{val}.in")
+                clustname = f"ghostatoms_{val}.xyz"
+                with open(clustname, 'w') as f:
+                    f.write(f"{len(clusterdf)}\n")
+                    f.write("Ghost atoms XYZ. Helium atoms were placed instead of Gh.H to be able to visualize them.\n")
+                    for _, row in clusterdf.iterrows():
+                        f.write(f"{row['atom']:<5} {row['x']:>10.5f} {row['y']:>10.5f} {row['z']:>10.5f}\n")
 
-                    clustname = f"ghostatoms_{val}.xyz"
-                    with open(clustname, 'w') as f:
-                        f.write(f"{len(clusterdf)}\n")
-                        f.write("Ghost atoms XYZ. Helium atoms were placed instead of Gh.H to be able to visualize them.\n")
-                        for _, row in clusterdf.iterrows():
-                            f.write(f"{row['atom']:<5} {row['x']:>10.5f} {row['y']:>10.5f} {row['z']:>10.5f}\n")
-
-                    print(f"  There are {aps:.2f} {ATNAME}-{RESNAME} atoms in average coordinating the solute.")
-                    print_once = True
+                print(f"  There are {aps:.2f} {ATNAME}-{RESNAME} atoms in average coordinating the solute.")
 
             # Calculate weight of each configuration
             weights = weight(a=near_aps, b=far_aps, c=aps)
