@@ -1,4 +1,5 @@
 import re
+import os
 
 def parse_job(file_path):
     variables = {
@@ -41,41 +42,89 @@ def parse_job(file_path):
             raise ValueError("atname, resname, and qform must have the same number of elements")
 
     return variables
-      
-def process_file(input_file, skip):
-    frame_data = {}
-    current_frame = 0
-    curfr_data = []
-    box_length = None
-    total_frames = 0
-   
+
+def cutdata(line, frame_number):
+    try:
+        # Apply fixed-width slicing based on the PDB column format
+        # Columns:  frame_number, atom_number, atom_name, residue_name, residue_number, x, y, z
+        atom_number = line[6:11].strip()        # Atom serial number
+        atom_name = line[12:16].strip()         # Atom name
+        residue_name = line[17:20].strip()      # Residue name
+        residue_number = line[22:26].strip()    # Residue sequence number
+        x = line[30:38].strip()                 # X coordinate
+        y = line[38:46].strip()                 # Y coordinate
+        z = line[46:54].strip()                 # Z coordinate
+        return [frame_number, atom_number, atom_name, residue_name, residue_number, x, y, z]
+
+    except Exception as e:
+        print(f"Error parsing line in frame {frame_number}: {line}")
+        print(f"Error: {e}")
+        return None
+
+def count_frames(input_file):
+    total_size = os.path.getsize(input_file)
+    frame_size = 0
+    end_count = 0
+
     with open(input_file, "r") as file:
         for line in file:
+            if line.startswith("CRYST1"):
+                box_length = float(line.split()[1])  # Extract box length, only [1] if cubic
             if line.strip() == "END":
-                total_frames += 1
+                end_count += 1
+                if end_count == 2:
+                    break
+            if end_count >= 1:
+                frame_size += len(line)
+
+    total_frames = int(total_size // frame_size)
+    return total_frames, frame_size, box_length
+
+def process_file(input_file, skip, total_frames, box_length, frame_size, current_frame):
+    frame_data = {}
+    curfr_data = []
 
     if total_frames < skip:
         raise ValueError("Requested number of frames exceeds the total frames available.")
-    sf = max(1, total_frames // skip) # sf : Skip Factor (eg. 1/10 = 10000 / 100)
+
+    sf = max(1, total_frames // skip)  # sf : Skip Factor (e.g., 1/10 = 10000 / 100)
+
+    read_frames = 1 # Number of frames to read at once
+    chunk_size = frame_size * read_frames
 
     with open(input_file, "r") as file:
-        for line in file:
-            if line.strip() == "END":
-                if current_frame % sf == 0:
-                    frame_data[current_frame] = curfr_data[:]
-                curfr_data = []
-                current_frame += 1
-                
-            elif line.startswith("CRYST1"):
-                box_length = float(line.split()[1]) # Extract box length, only [1] if cubic
+        while current_frame[0] < total_frames:
+            if current_frame[0] == 0:
+                # Handle the first frame separately
+                while True:
+                    line = file.readline()
+                    if not line:
+                        break
+                    line = line.rstrip()
+                    prefix = line[:6]
+                    if line == "END":
+                        frame_data[current_frame[0]] = curfr_data[:]
+                        curfr_data = []
+                        break
+                    elif prefix in {"ATOM  ", "HETATM"}:
+                        filtered_line = cutdata(line, current_frame[0])
+                        if filtered_line is not None:
+                            curfr_data.append(filtered_line)
+            else:
+                chunk = file.read(chunk_size)
+                lines = chunk.split('\n')
+                if current_frame[0] % sf == 0:
+                    for line in lines:
+                        line = line.rstrip()
+                        prefix = line[:6]
+                        if line == "END":
+                            frame_data[current_frame[0]] = curfr_data[:]
+                            curfr_data = []
+                            break
+                        elif prefix in {"ATOM  ", "HETATM"}:
+                            filtered_line = cutdata(line, current_frame[0])
+                            if filtered_line is not None:
+                                curfr_data.append(filtered_line)
+            current_frame[0] += 1
 
-            elif line.startswith("ATOM") or line.startswith("HETATM"):
-                if current_frame % sf == 0:
-                    filtered_line = cutdata(line, current_frame)
-                    curfr_data.append(filtered_line)
-
-        return frame_data, current_frame, box_length                
-
-def cutdata(line, frame_number):
-    parts = line.split()
-    return [frame_number] + [parts[i] for i in [1, 2, 3, 5, 6, 7, 8]]
+    return frame_data, current_frame[0], box_length
