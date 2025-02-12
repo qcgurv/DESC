@@ -1,19 +1,6 @@
-#!/bin/bash
-
-#$ -N frame400
-#$ -cwd
-#$ -q mag21*,mag22*
-#$ -pe mpi* 32
-#$ -o $JOB_NAME.out
-
-source /etc/profile.d/modules.sh
-module load apps/adf/2022
-
-DIR=$(pwd)
-
-#cd $TMPDIR
-
-AMS_JOBNAME=$JOB_NAME $AMSBIN/ams << eor
+## Default theory level: BP86 / TZP
+## The solvent has been automatically detected. Please ensure it is correct.
+## Please enter the charge (and spin polarization, if necessary).
 
 Task SinglePoint
 
@@ -477,6 +464,3 @@ Gh.H   13.380   32.540    0.350 adf.r=1.871
         End
     End
 End
-eor
-
-mv ${JOB_NAME}.results/adf.rkf $DIR/$JOB_NAME.rkf
