@@ -1,4 +1,6 @@
-
+<div style="text-align: center;">
+  <img src="images/desc-logo.png" width="300"/>
+</div>
 
 # DESC: Dynamic Environment in Solution by Clustering
 
