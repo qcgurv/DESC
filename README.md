@@ -1,5 +1,5 @@
 <div style="text-align: center;">
-  <img src="images/desc-head.png" width="300"/>
+  <img src="images/desc-head.png" />
 </div>
 
 # DESC: Dynamic Environment in Solution by Clustering
