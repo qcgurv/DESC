@@ -45,7 +45,7 @@ Before DESC is used, it is crucial that the solute of interest maintains the sam
 
 ![](images/desc-proc.png)
 
-More information about DESC can be found in the [PhD thesis](link) of the author.
+More information about DESC can be found in the [PhD thesis](https://www.tesisenred.net/handle/10803/692316?show=full) of the author.
 
 ## Usage
 Once installed successfully, DESC only requires the trajectory in PDB format and the job-DESC input file. Execute it as follows:
