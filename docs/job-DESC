@@ -2,7 +2,7 @@
 # Trajectory filename
 traj        = 
 
-# Number of frames to save
+# Number of frames to save (recommended: 400)
 frames      = 
 
 # Reference residue name (solute)
