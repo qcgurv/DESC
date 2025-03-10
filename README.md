@@ -59,7 +59,7 @@ Make sure that job-DESC correctly references the trajectory filename!
 ## How to cite
 If you employ DESC and publish findings derived from this method, we kindly request that you cite the original publication:
 
-> Masip-Sánchez, A., Poblet, J.M., López, X., *Manuscript in preparation*, **2025**.
+> Masip-Sánchez, A., Poblet, J.M., López, X., *Journal of Chemical Theory and Computation*, **2025**, DOI: [10.1021/acs.jctc.5c00002](10.1021/acs.jctc.5c00002).
 
 ## Support and Contact
 In case you should encounter problems or bugs, please write a short message to albert.masip@urv.cat.
